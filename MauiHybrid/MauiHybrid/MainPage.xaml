@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MauiHybrid.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MauiHybrid"
+    xmlns:route="clr-namespace:MauiHybrid.Components"
+    xmlns:shared="clr-namespace:MauiHybrid.Shared;assembly=MauiHybrid.Shared"
+    BackgroundColor="{DynamicResource PageBackgroundColor}"
+    NavigationPage.HasBackButton="False"
+    NavigationPage.HasNavigationBar="False">
+
+    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
+        <BlazorWebView.RootComponents>
+            <RootComponent ComponentType="{x:Type route:Routes}" Selector="#app" />
+        </BlazorWebView.RootComponents>
+    </BlazorWebView>
+
+</ContentPage>

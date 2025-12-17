@@ -1,0 +1,19 @@
+@page "/deviceinfo"
+@using MauiHybrid.Services
+@inject INavigationService NavigationService
+@inject NavigationManager NavManager
+
+<h3>Redirigiendo...</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Navegar a la página nativa de MAUI
+        await NavigationService.NavigateToDeviceInfoAsync();
+        
+        // Redirigir de vuelta al home en el contexto Blazor
+        // para que el usuario pueda volver fácilmente
+        NavManager.NavigateTo("/", replace: true);
+    }
+}
+

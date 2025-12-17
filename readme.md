@@ -1,225 +1,163 @@
-# .NET MAUI Blazor Hybrid and Web App Auth Sample
-This sample demonstrates how to build .NET MAUI Blazor Hybrid and Web Apps that shares common UI and also provides *authentication*. It uses ASP.NET Core Identity local accounts but you can use this pattern for any authentication provider you need to call from a MAUI Blazor Hybrid client. This sample demonstrates the following:
-- Setting up the UI to show/hide pages if a user is/is not authenticated
-- Setting up the ASP.NET Identity endpoints so they can be called by remote clients
-- Logging in, Logging out, and refreshing tokens from the MAUI client
-- Saving and retrieving tokens in secure device storage
-- Calling a secure endpoint (/api/weather) from the client
+# Aplicación Híbrida .NET MAUI Blazor con Autenticación
 
-## Running the sample
-1. Clone the repository.
-1. Make sure you have [.NET 9 installed and the MAUI workload](https://learn.microsoft.com/en-us/dotnet/maui/get-started/installation?view=net-maui-9.0&tabs=vswin).
-1. Open the solution in Visual Studio 2022 or VS Code with the .NET MAUI extension installed.
-1. Set the `MauiHybridAuth` MAUI project as the startup project.
-1. Start the `MauiHybridAuth.Web` project without debugging (in Visual Studio right-click on the project and select "Debug -> Start without Debugging").
-1. Register a user in the Blazor Web app UI or navigate to `https://localhost:7157/swagger` in your browser to pull up the identity endpoints and register a user using the `/identity/register` endpoint.
-1. Start (F5) the `MauiHybridAuth` MAUI project. You can set the debug target to Windows or an Android emulator.
-1. Notice you can only see the Home and Login pages.
-1. Log in with the user you registered.
-1. Notice you can now see the shared Counter and Weather pages.
-1. Log out and notice you can only see the Home and Login pages again.
-1. Navigate the web app to `https://localhost:7157/` and the app will behave the same.
+Este ejemplo demuestra cómo construir aplicaciones híbridas .NET MAUI Blazor y aplicaciones web que comparten UI común y proporcionan *autenticación*. Utiliza ASP.NET Core Identity con cuentas locales, pero puedes usar este patrón con cualquier proveedor de autenticación.
 
-## Tour of the important parts
-### Shared UI
-The shared UI is in the `MauiHybridAuth.Shared` project. This project contains the Razor components that are shared between the MAUI and Blazor Web projects (Home, Counter and Weather pages). The `Counter.razor` and `Weather.razor` pages are protected by the `[Authorize]` attribute so you cannot navigate to them unless you are logged in.
+## 🎥 Video Demo
 
-```code
+[![Video Demo](https://img.youtube.com/vi/EnVpeOiR1tc/maxresdefault.jpg)](https://www.youtube.com/watch?v=EnVpeOiR1tc)
+
+*Haz clic en la imagen para ver el video de demostración*
+
+## Características Principales
+
+- ✅ Autenticación compartida entre la app MAUI y la aplicación web
+- ✅ UI compartida usando componentes Razor Blazor
+- ✅ Navegación híbrida entre páginas Blazor y páginas XAML nativas de MAUI
+- ✅ Acceso a funcionalidades nativas del dispositivo desde páginas XAML
+- ✅ Almacenamiento seguro de tokens en el dispositivo
+- ✅ Llamadas a endpoints protegidos desde el cliente
+
+## Ejecutar el Proyecto
+
+1. Clona el repositorio.
+2. Asegúrate de tener [.NET 10 instalado con la carga de trabajo MAUI](https://learn.microsoft.com/en-us/dotnet/maui/get-started/installation?view=net-maui-9.0&tabs=vswin).
+3. Abre la solución en Visual Studio 2022.
+4. Establece el proyecto `MauiHybrid` como proyecto de inicio.
+5. Inicia el proyecto `MauiHybrid.Web` sin depuración (clic derecho → "Depurar" → "Iniciar sin depurar").
+6. Registra un usuario en la aplicación web Blazor o navega a `https://localhost:7157/swagger` para usar el endpoint `/identity/register`.
+7. Inicia (F5) el proyecto `MauiHybrid`. Puedes ejecutarlo en Windows o un emulador Android.
+8. Inicia sesión con el usuario que registraste.
+9. Explora las páginas compartidas (Counter, Weather) y la página nativa de especificaciones del dispositivo.
+
+## Navegación Híbrida: Blazor ↔ XAML Nativo
+
+Una de las características más importantes de esta aplicación es la capacidad de navegar entre páginas Blazor y páginas XAML nativas de MAUI. Esto demuestra el verdadero poder de las aplicaciones híbridas.
+
+### Página Nativa de Especificaciones del Dispositivo
+
+La aplicación incluye una página XAML nativa (`DeviceInfoPage.xaml`) que muestra información del dispositivo físico:
+
+- Modelo y fabricante
+- Versión del sistema operativo
+- Resolución y densidad de pantalla
+- Si es un dispositivo físico o virtual
+
+Esta página se puede acceder desde el menú de navegación Blazor, demostrando la integración perfecta entre ambos mundos.
+
+### Cómo Funciona la Navegación Híbrida
+
+1. **Desde Blazor a XAML Nativo**: El menú Blazor contiene un enlace que navega a una página Razor (`DeviceInfo.razor`), que a su vez utiliza un servicio de navegación (`INavigationService`) para abrir la página XAML nativa.
+
+2. **Desde XAML Nativo a Blazor**: La página nativa tiene un botón de retroceso que vuelve a la aplicación Blazor usando la navegación estándar de MAUI.
+
+```csharp
+// Servicio de navegación que permite ir de Blazor a XAML
+public class NavigationService : INavigationService
+{
+    public async Task NavigateToDeviceInfoAsync()
+    {
+        var mainPage = Application.Current?.MainPage;
+        if (mainPage?.Navigation != null)
+        {
+            await mainPage.Navigation.PushAsync(new DeviceInfoPage());
+        }
+    }
+}
+```
+
+### Configuración de la Navegación
+
+El proyecto está configurado para usar `NavigationPage` como contenedor principal, lo que permite la navegación nativa:
+
+```csharp
+// App.xaml.cs
+protected override Window CreateWindow(IActivationState? activationState)
+{
+    return new Window(new NavigationPage(new MainPage())) 
+    { 
+        Title = "MauiHybrid" 
+    };
+}
+```
+
+La página principal de Blazor (`MainPage.xaml`) tiene la barra de navegación oculta para mantener la experiencia full-screen:
+
+```xml
+<ContentPage NavigationPage.HasNavigationBar="False"
+             NavigationPage.HasBackButton="False">
+    <BlazorWebView ... />
+</ContentPage>
+```
+
+## Componentes Compartidos
+
+La UI compartida está en el proyecto `MauiHybrid.Shared`. Este proyecto contiene los componentes Razor que se comparten entre la aplicación MAUI y la aplicación web Blazor (páginas Home, Counter y Weather).
+
+Las páginas `Counter.razor` y `Weather.razor` están protegidas con el atributo `[Authorize]`, por lo que no puedes navegar a ellas a menos que estés autenticado.
+
+```razor
 @page "/counter"
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 ```
-### Routing in the MAUI & Blazor apps
-The `Routes.razor` uses the `AuthorizeRouteView` to route users appropriately based on their authentication status. If a user is not authenticated, they are redirected to the `Login` page.
 
-```code
-<AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
-    <Authorizing>
-        Authorizing...
-    </Authorizing>
-    <NotAuthorized>
-        <Login />
-    </NotAuthorized>
-</AuthorizeRouteView>
-```
+## Autenticación
 
-The `NavManu.razor` components contain the navigation menu that uses `AuthorizationView` to show/hide links based on the user's authentication status.
+### Configuración del Servidor
 
-```code
-<AuthorizeView>
-    <NotAuthorized>
-       <!-- Navlinks that display when not logged in -->
-    </NotAuthorized>
-    <Authorized>
-        <!-- Navlinks that display when logged in -->
-    </Authorized>
-</AuthorizeView>
-```
-### Setting up the server
-The Blazor Web app contains all the pages and uses the `SignInManager` framework class to manage logins and users. All of this is generated automatically when you create a Blazor Web project and select to use Authentication with Individual accounts. In order for the MAUI client (or any external client) to authenticate, the ASP.NET Identity endpoints need to be exposed. In the `Program.cs` file this is set up with the call to `AddIdentityEnpoints` and `MapIdentityApi`. NOTE: You'll need to remove the generated call to `.AddIdentityCookies` on `.AddAuthentication`. It is not necessary when calling `.AddIdentityEndpoints` and will result in an error.
+La aplicación web Blazor expone los endpoints de ASP.NET Identity para que puedan ser llamados por clientes externos (como la app MAUI). Esto se configura en `Program.cs`:
 
-```code
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-// Add device-specific services used by the MauiHybridAuth.Shared project
-builder.Services.AddSingleton<IFormFactor, FormFactor>();
-builder.Services.AddScoped<IWeatherService, WeatherService>();
-
-// Add Auth services used by the Web app
-builder.Services.AddAuthentication(options =>
-{
-    // Ensure that unauthenticated clients redirect to the login page rather than receive a 401 by default.
-    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-});
-
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-//Needed for external clients to log in
-builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+```csharp
+// Necesario para que clientes externos puedan autenticarse
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options => 
+    options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+// ...
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    // Apply migrations & create database if needed at startup
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate();
-    }
-    app.UseMigrationsEndPoint();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddAdditionalAssemblies(typeof(MauiHybridAuth.Shared._Imports).Assembly);
-
-// Needed for external clients to log in
+// Mapear los endpoints de identidad
 app.MapGroup("/identity").MapIdentityApi<ApplicationUser>();
-// Needed for Identity Blazor components
-app.MapAdditionalIdentityEndpoints();
-
-//Add the weather API endpoint and require authorization
-app.MapGet("/api/weather", async (IWeatherService weatherService) =>
-{
-    var forecasts = await weatherService.GetWeatherForecastsAsync();
-    return Results.Ok(forecasts);
-}).RequireAuthorization();
-
-app.Run();
 ```
-### Logging in from the MAUI client
-The `Login.razor` page is where the user logs in. The `Login` page injects the `ICustomAuthenticationStateProvider` and uses the `AuthenticationStateProvider` to authenticate the user and redirect them to the home page if successful. When the state changes, the `AuthorizeView` reacts and will show the appropriate pages/links based on the user's authentication status.
 
-```code
-//Called on valid submit
-private async Task LoginUser()
+### Autenticación desde el Cliente MAUI
+
+El `MauiAuthenticationStateProvider` gestiona el estado de autenticación del usuario. Utiliza `HttpClient` para hacer peticiones al servidor y almacena los tokens de forma segura usando `SecureStorage`.
+
+```csharp
+// Login desde el cliente MAUI
+private async Task<ClaimsPrincipal> LoginWithProviderAsync(LoginRequest loginModel)
 {
-    await AuthStateProvider.LogInAsync(LoginModel);
-
-    if (AuthStateProvider.LoginStatus != LoginStatus.Success)
+    var httpClient = HttpClientHelper.GetHttpClient();
+    var response = await httpClient.PostAsJsonAsync(HttpClientHelper.LoginUrl, loginData);
+    
+    if (response.IsSuccessStatusCode)
     {
-        //Show error message
-        loginFailureHidden = false;
-        return;
+        var token = await response.Content.ReadAsStringAsync();
+        await TokenStorage.SaveTokenToSecureStorageAsync(token, loginModel.Email);
+        // ...
     }
-
-    Navigation.NavigateTo(""); //Root URL
 }
 ```
-NOTE: This sample only implements Login and Logout pages on the MAUI client but you could build Register and other management pages against the exposed endpoints for more functionality. For more information on identity endpoints see [How to use Identity to secure a Web API backend for SPAs](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity-api-authorization)
 
-### MauiAuthenticationStateProvider
-The `MauiAuthenticationStateProvider` class is in the `MauiHybridAuth` MAUI project. This class is responsible for managing the user's authentication state and providing the `AuthenticationState` to the app. The `MauiAuthenticationStateProvider` class uses an `HttpClient` to make requests to the server to authenticate the user. See the official documentation for more information on [ASP.NET Core Blazor Hybrid authentication and authorization](https://learn.microsoft.com/en-us/aspnet/core/blazor/hybrid/security/?view=aspnetcore-8.0&pivots=maui).
+### Registro en MauiProgram.cs
 
-```code
- private async Task<ClaimsPrincipal> LoginWithProviderAsync(LoginRequest loginModel)
- {
-     var authenticatedUser = _defaultUser;
-     LoginStatus = LoginStatus.None;
+El proveedor de autenticación se registra en el contenedor de inyección de dependencias:
 
-     try
-     {
-         //Call the Login endpoint and pass the email and password
-         var httpClient = HttpClientHelper.GetHttpClient();
-         var loginData = new { loginModel.Email, loginModel.Password };
-         var response = await httpClient.PostAsJsonAsync(HttpClientHelper.LoginUrl, loginData);
-
-         LoginStatus = response.IsSuccessStatusCode ? LoginStatus.Success : LoginStatus.Failed;
-
-         if (LoginStatus == LoginStatus.Success)
-         {
-             // Save token to secure storage so the user doesn't have to login every time
-             var token = await response.Content.ReadAsStringAsync();
-             _accessToken = await TokenStorage.SaveTokenToSecureStorageAsync(token, loginModel.Email);
-
-             authenticatedUser = CreateAuthenticatedUser(loginModel.Email);
-             LoginStatus = LoginStatus.Success;
-         }
-         else
-         {
-             LoginFailureMessage = "Invalid Email or Password. Please try again.";
-             LoginStatus = LoginStatus.Failed;
-         }
-     }
-     catch (Exception ex)
-     {
-         Debug.WriteLine($"Error logging in: {ex}");
-         LoginFailureMessage = "Server error.";
-         LoginStatus = LoginStatus.Failed;
-     }
-
-     return authenticatedUser;
- }
-```
-
-The `MauiAuthenticationStateProvider` class uses the `HttpClientHelper` which handles calling localhost via the emulators and simulators for easy testing. See the [official documentation](https://learn.microsoft.com/dotnet/maui/data-cloud/local-web-services) for information on what you need to do to be able to call local services from emulators and simulators.
-
-It also uses the `TokenStorage` class that uses [`SecureStorage` API](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-9.0) to store the user's token securely on the device. It refreshes the token if it's almost expired so the user doesn't have to login every time.
-
-### MAUI MauiProgram.cs
-The MAUI project's `MauiProgram.cs` file is where the `MauiAuthenticationStateProvider` is registered with the DI container. It also needs to register the Authorization core components where things like `AuthorizeView` are defined.
-
-```code
- // This is the core functionality
+```csharp
 builder.Services.AddAuthorizationCore();
-// This is our custom provider
-builder.Services.AddScoped<MauiAuthenticationStateProvider, MauiAuthenticationStateProvider>();
-// Use our custom provider when the app needs an AuthenticationStateProvider
-builder.Services.AddScoped<AuthenticationStateProvider>(s
-    => (MauiAuthenticationStateProvider)s.GetRequiredService<MauiAuthenticationStateProvider>());
+builder.Services.AddScoped<MauiAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(s =>
+    (MauiAuthenticationStateProvider)s.GetRequiredService<MauiAuthenticationStateProvider>());
 ```
+
+## Estructura del Proyecto
+
+- **MauiHybrid**: Proyecto MAUI con Blazor WebView y páginas XAML nativas
+- **MauiHybrid.Shared**: Componentes Razor compartidos entre MAUI y Web
+- **MauiHybrid.Web**: Aplicación web Blazor con autenticación
+
+## Recursos Adicionales
+
+- [Documentación oficial de Blazor Hybrid](https://learn.microsoft.com/en-us/aspnet/core/blazor/hybrid/?view=aspnetcore-10.0)
+- [Autenticación en Blazor Hybrid](https://learn.microsoft.com/en-us/aspnet/core/blazor/hybrid/security/?view=aspnetcore-10.0)
+- [SecureStorage en MAUI](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-10.0)

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MauiHybrid.DeviceInfoPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Especificaciones del Dispositivo">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="20">
+
+            <!--  Título  -->
+            <Label
+                Margin="0,20,0,10"
+                FontAttributes="Bold"
+                FontSize="28"
+                HorizontalOptions="Center"
+                Text="📱 Información del Dispositivo"
+                TextColor="Black" />
+
+            <Label
+                Margin="0,0,0,20"
+                FontAttributes="Bold"
+                FontSize="18"
+                HorizontalOptions="Center"
+                Text="Esta es una página XAML nativa de MAUI"
+                TextColor="Red" />
+
+            <!--  Frame con la información del dispositivo  -->
+            <Frame
+                Padding="20"
+                BackgroundColor="White"
+                BorderColor="LightGray"
+                CornerRadius="10"
+                HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        x:Name="DisplayDeviceLabel"
+                        FontSize="16"
+                        LineBreakMode="WordWrap"
+                        TextColor="Black" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!--  Botón para refrescar  -->
+            <Button
+                Margin="0,10,0,0"
+                Padding="15"
+                BackgroundColor="#512BD4"
+                Clicked="OnRefreshClicked"
+                CornerRadius="8"
+                Text="🔄 Actualizar Información"
+                TextColor="White" />
+
+            <!--  Botón para volver a Blazor  -->
+            <Button
+                Margin="0,5,0,0"
+                Padding="15"
+                BackgroundColor="#2E7D32"
+                Clicked="OnBackClicked"
+                CornerRadius="8"
+                Text="← Volver al Menú"
+                TextColor="White" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
+
